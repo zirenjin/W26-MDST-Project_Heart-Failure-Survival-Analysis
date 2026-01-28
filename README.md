@@ -27,11 +27,31 @@ Hypothesis testing (T-test, Mann-Whitney U), correlation analysis, multiple test
 | 1 | Data Exploration | [Notebook](Week1.ipynb), [Seaborn Docs](https://seaborn.pydata.org/), [Pandas Docs](https://pandas.pydata.org/docs/) |
 | 2 | Statistical Analysis | [Notebook](Week2.ipynb), [Scipy Stats](https://docs.scipy.org/doc/scipy/reference/stats.html), [Statsmodels](https://www.statsmodels.org/) |
 
+## Research Background
+
+This project is based on the paper by Chicco & Jurman (2020):
+
+> **Machine learning can predict survival of patients with heart failure from serum creatinine and ejection fraction alone**
+> *BMC Medical Informatics and Decision Making, 20, 16*
+
+**Key Findings from the Paper:**
+- Applied several ML classifiers (Random Forest, Gradient Boosting, SVM, etc.) to predict survival
+- Discovered that **serum creatinine** and **ejection fraction** alone achieve strong predictive performance
+- Random Forest achieved the best results with Matthews Correlation Coefficient (MCC) of 0.418
+- Feature ranking analysis revealed time, serum creatinine, and ejection fraction as top predictors
+- Demonstrated that complex models with all 13 features do not significantly outperform simpler 2-feature models
+
+**Clinical Relevance:**
+- Serum creatinine indicates kidney function, often impaired in heart failure patients
+- Ejection fraction measures heart pumping efficiency, a direct indicator of cardiac health
+- These two biomarkers are routinely measured and can guide clinical decision-making
+
+[Read the full paper](https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-020-1023-5)
+
 ## Resources
 
 - [UCI Dataset](https://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
 - [Scikit-learn](https://scikit-learn.org/stable/)
-- Chicco, D., Jurman, G. *Machine learning can predict survival of patients with heart failure*. BMC Med Inform Decis Mak 20, 16 (2020)
 
 ## Getting Started
 
