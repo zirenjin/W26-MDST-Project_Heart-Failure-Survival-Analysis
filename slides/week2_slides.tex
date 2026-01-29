@@ -1,0 +1,200 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\title{Week 2: Statistical Analysis}
+\subtitle{Heart Failure Survival Analysis}
+\author{MDST Project}
+\date{Winter 2026}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\section{Correlation Analysis}
+
+\begin{frame}{Pearson Correlation}
+\begin{itemize}
+    \item Measures \textbf{linear relationship} between two variables
+    \item Range: $-1$ to $+1$
+    \begin{itemize}
+        \item $+1$: Perfect positive correlation
+        \item $0$: No linear correlation
+        \item $-1$: Perfect negative correlation
+    \end{itemize}
+    \item Formula: $r = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum(x_i - \bar{x})^2 \sum(y_i - \bar{y})^2}}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Feature Correlations with DEATH\_EVENT}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Positive Correlations:}
+\begin{itemize}
+    \item serum\_creatinine: 0.29
+    \item age: 0.25
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{Negative Correlations:}
+\begin{itemize}
+    \item time: -0.53
+    \item ejection\_fraction: -0.27
+    \item serum\_sodium: -0.20
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Key Insight:}\\
+Follow-up time has the strongest correlation with death event, but this is expected (patients who die have shorter follow-up).
+\end{columns}
+\end{frame}
+
+\section{Statistical Tests}
+
+\begin{frame}{T-Test}
+\begin{itemize}
+    \item Compares \textbf{means} between two groups
+    \item Assumes: Normal distribution, equal variances
+    \item Welch's t-test: Does not assume equal variances
+    \item Null hypothesis: No difference between group means
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{When to use:}
+\begin{itemize}
+    \item Continuous data
+    \item Comparing two groups (survived vs. died)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mann-Whitney U Test}
+\begin{itemize}
+    \item \textbf{Non-parametric} alternative to t-test
+    \item Does NOT assume normal distribution
+    \item Compares \textbf{ranks} instead of means
+    \item More robust to outliers
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{When to use:}
+\begin{itemize}
+    \item Data is not normally distributed
+    \item Ordinal data or skewed distributions
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Significant Features (p < 0.05)}
+\begin{table}
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Feature} & \textbf{T-test p-value} & \textbf{Mann-Whitney p-value} \\
+\midrule
+time & $2.3 \times 10^{-22}$ & $6.9 \times 10^{-21}$ \\
+ejection\_fraction & $9.6 \times 10^{-6}$ & $7.4 \times 10^{-7}$ \\
+age & $4.7 \times 10^{-5}$ & $1.7 \times 10^{-4}$ \\
+serum\_creatinine & $6.4 \times 10^{-5}$ & $1.6 \times 10^{-10}$ \\
+serum\_sodium & $1.9 \times 10^{-3}$ & $2.9 \times 10^{-4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+\section{Multiple Testing Correction}
+
+\begin{frame}{The Problem with Multiple Testing}
+\begin{itemize}
+    \item Testing 12 features at $\alpha = 0.05$
+    \item Each test has 5\% chance of false positive
+    \item Expected false positives: $12 \times 0.05 = 0.6$
+    \item \textbf{Family-wise error rate} increases with more tests
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{Solution:} Adjust p-values to control false discovery rate (FDR)
+\end{frame}
+
+\begin{frame}{Benjamini-Hochberg (FDR) Correction}
+\begin{itemize}
+    \item Controls the \textbf{False Discovery Rate}
+    \item FDR = Expected proportion of false positives among rejected hypotheses
+    \item Less conservative than Bonferroni correction
+    \item Procedure:
+    \begin{enumerate}
+        \item Rank p-values from smallest to largest
+        \item Adjust: $p_{adj} = p \times \frac{n}{rank}$
+        \item Compare adjusted p-values to $\alpha$
+    \end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{After FDR Correction}
+\textbf{Still significant (FDR < 0.05):}
+\begin{itemize}
+    \item time
+    \item ejection\_fraction
+    \item age
+    \item serum\_creatinine
+    \item serum\_sodium
+\end{itemize}
+
+\vspace{0.5cm}
+\textbf{Not significant after correction:}
+\begin{itemize}
+    \item high\_blood\_pressure, anaemia, diabetes, platelets, sex, smoking, creatinine\_phosphokinase
+\end{itemize}
+\end{frame}
+
+\section{Summary}
+
+\begin{frame}{Key Takeaways}
+\begin{enumerate}
+    \item \textbf{Correlation} measures linear relationships
+    \item \textbf{T-test} compares means (assumes normality)
+    \item \textbf{Mann-Whitney U} is non-parametric (no normality assumption)
+    \item \textbf{Multiple testing correction} is essential when testing many hypotheses
+    \item \textbf{5 features} are significantly different between survival groups
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Next Week: Unsupervised Learning}
+\begin{itemize}
+    \item \textbf{PCA} (Principal Component Analysis)
+    \begin{itemize}
+        \item Dimensionality reduction
+        \item Visualizing high-dimensional data
+    \end{itemize}
+    \item \textbf{Clustering}
+    \begin{itemize}
+        \item Finding natural groupings in data
+        \item K-means, hierarchical clustering
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercises}
+\begin{enumerate}
+    \item Write a function to return features with significant p-values given a threshold
+    \item Implement Mann-Whitney U test for all features
+    \item Interpret the correlation heatmap
+\end{enumerate}
+
+\vspace{0.5cm}
+\textbf{Resources:}
+\begin{itemize}
+    \item Scipy Stats: \url{https://docs.scipy.org/doc/scipy/reference/stats.html}
+    \item Statsmodels: \url{https://www.statsmodels.org/}
+\end{itemize}
+\end{frame}
+
+\end{document}

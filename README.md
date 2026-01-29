@@ -18,7 +18,11 @@ Introduction to the dataset, exploratory data analysis, and visualization techni
 
 <ins>**Week 2: Statistical Analysis**</ins> {<small>`Week2.ipynb`</small>}
 <br>
-Hypothesis testing (T-test, Mann-Whitney U), correlation analysis, multiple testing correction (FDR), and feature importance using Random Forest.
+Hypothesis testing (T-test, Mann-Whitney U), correlation analysis, and multiple testing correction (FDR).
+
+<ins>**Week 3: Unsupervised Learning**</ins> {<small>`Week3.ipynb`</small>}
+<br>
+Dimensionality reduction with PCA, clustering techniques, and visualizing high-dimensional data.
 
 ## Schedule
 
@@ -26,6 +30,7 @@ Hypothesis testing (T-test, Mann-Whitney U), correlation analysis, multiple test
 | --- | --- | --- |
 | 1 | Data Exploration | [Notebook](Week1.ipynb), [Seaborn Docs](https://seaborn.pydata.org/), [Pandas Docs](https://pandas.pydata.org/docs/) |
 | 2 | Statistical Analysis | [Notebook](Week2.ipynb), [Scipy Stats](https://docs.scipy.org/doc/scipy/reference/stats.html), [Statsmodels](https://www.statsmodels.org/) |
+| 3 | Unsupervised Learning | [Notebook](Week3.ipynb), [PCA Guide](https://scikit-learn.org/stable/modules/decomposition.html#pca), [Clustering](https://scikit-learn.org/stable/modules/clustering.html) |
 
 ## Research Background
 
