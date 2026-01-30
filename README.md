@@ -55,6 +55,7 @@ This project is based on the paper by Chicco & Jurman (2020):
 
 ## Resources
 
+- [Project Website](https://michigandatascienceteam.github.io/W26-MDST-Project_Heart-Failure-Survival-Analysis/)
 - [UCI Dataset](https://archive.ics.uci.edu/ml/datasets/Heart+failure+clinical+records)
 - [Scikit-learn](https://scikit-learn.org/stable/)
 
