@@ -4,6 +4,8 @@ Survival analysis of heart failure patients to identify key factors that disting
 
 **Key Finding**: Two features are sufficient to distinguish survival from death using different classifiers.
 
+**[View Project Website](https://michigandatascienceteam.github.io/W26-MDST-Project_Heart-Failure-Survival-Analysis/)**
+
 ## Structure
 
 Below is a high-level overview of the main components of this project.
@@ -18,7 +20,7 @@ Introduction to the dataset, exploratory data analysis, and visualization techni
 
 <ins>**Week 2: Statistical Analysis**</ins> {<small>`Week2.ipynb`</small>}
 <br>
-Hypothesis testing (T-test, Mann-Whitney U), correlation analysis, and multiple testing correction (FDR).
+Hypothesis testing (T-test, Mann-Whitney U), correlation analysis, multiple testing correction (FDR), feature variance analysis, and Variance Inflation Factor (VIF) for detecting multicollinearity.
 
 <ins>**Week 3: Unsupervised Learning**</ins> {<small>`Week3.ipynb`</small>}
 <br>
@@ -29,7 +31,7 @@ Dimensionality reduction with PCA, clustering techniques, and visualizing high-d
 | **Week** | **Topic** | **Links** |
 | --- | --- | --- |
 | 1 | Data Exploration | [Notebook](Week1.ipynb), [Seaborn Docs](https://seaborn.pydata.org/), [Pandas Docs](https://pandas.pydata.org/docs/) |
-| 2 | Statistical Analysis | [Notebook](Week2.ipynb), [Scipy Stats](https://docs.scipy.org/doc/scipy/reference/stats.html), [Statsmodels](https://www.statsmodels.org/) |
+| 2 | Statistical Analysis | [Notebook](Week2.ipynb), [Slides](slides/week2_slides.pdf), [Scipy Stats](https://docs.scipy.org/doc/scipy/reference/stats.html), [Statsmodels VIF](https://www.statsmodels.org/stable/generated/statsmodels.stats.outliers_influence.variance_inflation_factor.html) |
 | 3 | Unsupervised Learning | [Notebook](Week3.ipynb), [PCA Guide](https://scikit-learn.org/stable/modules/decomposition.html#pca), [Clustering](https://scikit-learn.org/stable/modules/clustering.html) |
 
 ## Research Background
