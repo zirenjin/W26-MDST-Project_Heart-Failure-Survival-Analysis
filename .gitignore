@@ -23,6 +23,16 @@ Thumbs.db
 # Data (if large)
 *.csv.gz
 
+# LaTeX auxiliary files
+*.aux
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
 # Misc
 *.log
 .env

@@ -1,0 +1,536 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\title{Week 3: Data Normalization, Unsupervised Learning \& Clustering}
+\subtitle{Heart Failure Survival Analysis}
+\author{MDST Project}
+\date{Winter 2026}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+%=============================================================================
+\section{Week 2 Recap}
+%=============================================================================
+
+\begin{frame}{Quick Recap: Week 2 - Statistical Analysis}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Significant Features (p $<$ 0.05):}
+\begin{enumerate}
+    \item time ($p \approx 10^{-22}$)
+    \item ejection\_fraction ($p \approx 10^{-6}$)
+    \item serum\_creatinine ($p \approx 10^{-5}$)
+    \item age ($p \approx 10^{-5}$)
+    \item serum\_sodium ($p \approx 10^{-3}$)
+\end{enumerate}
+
+\column{0.5\textwidth}
+\textbf{Not Significant:}
+\begin{itemize}
+    \item diabetes, sex, smoking
+    \item platelets, anaemia
+    \item creatinine\_phosphokinase
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Key Point:} Results held after FDR correction for multiple testing.
+\end{columns}
+\end{frame}
+
+\begin{frame}{From Statistics to Unsupervised Learning}
+\begin{table}
+\centering
+\begin{tabular}{p{5.5cm}p{5.5cm}}
+\toprule
+\textbf{Week 2: Statistics} & \textbf{Week 3: Unsupervised} \\
+\midrule
+``Which features differ between groups?'' & ``Can we find natural groupings without labels?'' \\
+\midrule
+Uses the target variable (supervised) & Ignores the target variable \\
+\midrule
+Tests one feature at a time & Considers all features together \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\textbf{This Week's Goal:} Normalize data, reduce dimensions with PCA, and cluster patients to see if the survived/died groups emerge naturally.
+\end{frame}
+
+%=============================================================================
+\section{Data Normalization}
+%=============================================================================
+
+\begin{frame}{Why Normalize?}
+\textbf{Problem:} Features are on very different scales!
+
+\vspace{0.3cm}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Raw Feature Ranges:}
+\begin{itemize}
+    \item Platelets: 25,100 -- 850,000
+    \item Age: 40 -- 95
+    \item Ejection fraction: 14 -- 80
+    \item Anaemia: 0 or 1
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Why This Matters:}
+\begin{itemize}
+    \item PCA will be dominated by large-scale features
+    \item Clustering distances will be skewed
+    \item Platelets ``outweighs'' all other features
+\end{itemize}
+\end{columns}
+
+\vspace{0.5cm}
+\textbf{Solution:} Put all features on the same scale!
+\end{frame}
+
+\begin{frame}{Z-Score Standardization}
+\textbf{Formula:}
+$$z = \frac{x - \mu}{\sigma}$$
+
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{What It Does:}
+\begin{itemize}
+    \item Subtracts the mean ($\mu$)
+    \item Divides by standard deviation ($\sigma$)
+    \item Result: mean = 0, std = 1
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Interpretation:}
+\begin{itemize}
+    \item $z = 0$: at the average
+    \item $z = +2$: 2 std above average
+    \item $z = -1$: 1 std below average
+\end{itemize}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Key Property:} Z-scoring is a \textbf{linear transformation}. It does NOT change the shape of the distribution, the rank order, or any statistical test results.
+\end{frame}
+
+\begin{frame}{Discussion}
+\begin{center}
+\Large\textbf{If you run PCA on non-normalized data, PC1 explains $\sim$90\% of the variance by itself.}
+
+\vspace{0.5cm}
+\Large\textit{Is this a good thing? Why or why not?}
+\end{center}
+\end{frame}
+
+%=============================================================================
+\section{Principal Component Analysis (PCA)}
+%=============================================================================
+
+\begin{frame}{What is PCA?}
+\textbf{Problem:} We have 12 features. Hard to visualize or understand.
+
+\vspace{0.3cm}
+\textbf{PCA} finds new axes (principal components) that capture the most variance in the data.
+
+\vspace{0.3cm}
+$$X \approx Z \cdot W^T$$
+
+\begin{columns}
+\column{0.5\textwidth}
+\begin{itemize}
+    \item $X$: original data (299 $\times$ 12)
+    \item $Z$: scores in PC space (299 $\times$ k)
+    \item $W$: loadings (how features contribute)
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Goal:} Find $W$ that minimizes the reconstruction error between $X$ and $Z \cdot W^T$
+
+\vspace{0.3cm}
+PC1 captures the most variance, PC2 the next most, etc.
+\end{columns}
+\end{frame}
+
+\begin{frame}{Key PCA Concepts}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Explained Variance Ratio:}
+\begin{itemize}
+    \item How much information each PC captures
+    \item PC1: 13.9\%, PC2: 13.2\%, PC3: 10.6\%
+    \item No single PC dominates (after normalization!)
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Cumulative Variance:}
+\begin{itemize}
+    \item How many PCs for 80\%? 90\%?
+    \item Rule of thumb: keep enough for $\sim$80--90\%
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Loadings:}
+\begin{itemize}
+    \item How strongly each feature contributes to each PC
+    \item High loading = feature is important for that PC
+    \item Positive/negative = direction of contribution
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Scores:}
+\begin{itemize}
+    \item Each patient's coordinates in PC space
+    \item Used for visualization (2D scatter plot)
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{PCA Scores Plot}
+\begin{center}
+\textbf{Can we see separation between survived and died in PC space?}
+
+\vspace{0.3cm}
+\textit{Plot PC1 vs PC2, colored by DEATH\_EVENT}
+
+\vspace{0.5cm}
+\fbox{\parbox{0.7\textwidth}{
+\centering
+\textbf{Observation:} The two groups overlap heavily.\\[0.2cm]
+No clear boundary between survived and died in the first 2 PCs.\\[0.2cm]
+This hints that unsupervised methods may struggle.
+}}
+\end{center}
+\end{frame}
+
+%=============================================================================
+\section{K-Means Clustering}
+%=============================================================================
+
+\begin{frame}{From PCA to Clustering}
+\begin{center}
+\Large Now that we can visualize the data in lower dimensions,\\[0.3cm]
+\Large can unsupervised clustering recover the\\survived/died groups \textbf{without using the labels}?
+\end{center}
+\end{frame}
+
+\begin{frame}{How K-Means Works}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Algorithm:}
+\begin{enumerate}
+    \item Choose K (number of clusters)
+    \item Randomly initialize K centroids
+    \item Assign each point to nearest centroid
+    \item Recalculate centroids as cluster means
+    \item Repeat steps 3--4 until convergence
+\end{enumerate}
+
+\column{0.5\textwidth}
+\textbf{Properties:}
+\begin{itemize}
+    \item Requires specifying K upfront
+    \item Assumes spherical clusters
+    \item Every point is assigned to exactly one cluster
+    \item Sensitive to initialization (use \texttt{n\_init})
+    \item Fast, widely used
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Choosing K: Elbow Method}
+\textbf{Inertia} (within-cluster sum of squares):
+$$\text{Inertia} = \sum_{i=1}^{n} \| x_i - c_k \|^2$$
+
+where $c_k$ is the centroid of point $x_i$'s cluster.
+
+\vspace{0.3cm}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{How It Works:}
+\begin{itemize}
+    \item Plot inertia vs. K
+    \item Inertia always decreases as K increases
+    \item Look for the ``elbow'' -- where the curve bends
+    \item Diminishing returns after the elbow
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Limitation:}
+\begin{itemize}
+    \item The elbow is often ambiguous
+    \item Inertia ALWAYS decreases (at K=n, inertia=0)
+    \item Use silhouette score as a complement
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Choosing K: Silhouette Score}
+\textbf{Silhouette Score} measures how well each point fits its cluster:
+
+$$s = \frac{b - a}{\max(a, b)}$$
+
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{For each data point:}
+\begin{itemize}
+    \item $a$ = average distance to points in \textbf{same} cluster
+    \item $b$ = average distance to points in \textbf{nearest other} cluster
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Interpretation:}
+\begin{itemize}
+    \item $s = +1$: perfectly clustered
+    \item $s = 0$: on the boundary
+    \item $s < 0$: probably in the wrong cluster
+    \item $s < 0.25$: weak clustering structure
+\end{itemize}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Our Dataset:} Silhouette score at K=2 is below 0.25, indicating weak natural cluster structure.
+\end{frame}
+
+\begin{frame}{K-Means Results: Confusion Matrix}
+\textbf{How well do K-Means clusters (K=2) match the true labels?}
+
+\vspace{0.3cm}
+\begin{center}
+\fbox{\parbox{0.7\textwidth}{
+\centering
+\textbf{Result:} The clusters don't cleanly map to survived/died.\\[0.2cm]
+K-Means finds groupings based on feature similarity,\\
+but feature similarity $\neq$ same outcome.
+}}
+\end{center}
+
+\vspace{0.3cm}
+\textbf{Why?} The survived and died groups overlap in feature space. Patients who died can look very similar to patients who survived based on their clinical measurements.
+\end{frame}
+
+%=============================================================================
+\section{Hierarchical Clustering}
+%=============================================================================
+
+\begin{frame}{Hierarchical (Agglomerative) Clustering}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Key Differences from K-Means:}
+\begin{itemize}
+    \item \textbf{Bottom-up}: starts with each point as its own cluster
+    \item Merges the closest pair at each step
+    \item No need to specify K upfront
+    \item Produces a \textbf{dendrogram} (tree)
+    \item Deterministic (no random initialization)
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Linkage Methods:}
+\begin{itemize}
+    \item \textbf{Ward}: minimizes within-cluster variance (balanced)
+    \item \textbf{Complete}: max distance between clusters (compact)
+    \item \textbf{Average}: mean distance (compromise)
+    \item \textbf{Single}: min distance (can chain)
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Reading a Dendrogram}
+\textbf{The Dendrogram} shows the full merge history:
+
+\vspace{0.3cm}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{How to Read It:}
+\begin{itemize}
+    \item X-axis: samples (or cluster sizes)
+    \item Y-axis: distance at which clusters merge
+    \item \textbf{Long vertical lines} = well-separated clusters
+    \item \textbf{Short vertical lines} = similar clusters merging
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Choosing K:}
+\begin{itemize}
+    \item Draw a horizontal line at a chosen height
+    \item Count how many vertical lines it crosses
+    \item That's the number of clusters
+    \item Look for the biggest ``gap'' in distances
+\end{itemize}
+\end{columns}
+
+\vspace{0.3cm}
+\textbf{Advantage over K-Means:} You can explore different numbers of clusters from a single computation!
+\end{frame}
+
+\begin{frame}{K-Means vs Hierarchical: Comparison}
+\begin{table}
+\centering
+\begin{tabular}{p{5.5cm}p{5.5cm}}
+\toprule
+\textbf{K-Means} & \textbf{Hierarchical} \\
+\midrule
+Must specify K before running & K chosen after seeing dendrogram \\
+\midrule
+Random initialization (non-deterministic) & Deterministic (always same result) \\
+\midrule
+Fast ($O(nK)$ per iteration) & Slower ($O(n^2 \log n)$) \\
+\midrule
+Every point assigned to a cluster & Full merge history preserved \\
+\midrule
+Assumes spherical clusters & Linkage method controls cluster shape \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{frame}
+
+%=============================================================================
+\section{Confusion Matrix}
+%=============================================================================
+
+\begin{frame}{Evaluating Clusters with a Confusion Matrix}
+\textbf{Since we know the true labels}, we can compare clusters to reality:
+
+\vspace{0.3cm}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{How to Read It:}
+\begin{itemize}
+    \item Rows: true outcome (Survived/Died)
+    \item Columns: cluster assignment (0/1)
+    \item Diagonal = agreement
+    \item Off-diagonal = disagreement
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{For Our Dataset:}
+\begin{itemize}
+    \item Neither K-Means nor Hierarchical cleanly separates the groups
+    \item Both produce roughly similar results
+    \item This tells us something important\ldots
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Discussion}
+\begin{center}
+\Large\textbf{Why do K-Means and hierarchical clustering fail to cleanly separate the survived and died groups?}
+
+\vspace{1cm}
+\textit{Think about: feature overlap, what clustering optimizes, and the nature of clinical outcomes.}
+\end{center}
+\end{frame}
+
+%=============================================================================
+\section{Why Clustering Struggles Here}
+%=============================================================================
+
+\begin{frame}{Why Unsupervised Methods Struggle on This Dataset}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{The Problem:}
+\begin{itemize}
+    \item Survived and died patients \textbf{overlap} heavily in feature space
+    \item Strongest correlation with death is only $\sim$0.29
+    \item No clean decision boundary exists
+    \item Mortality depends on \textbf{complex interactions}, not just distance
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{What This Means:}
+\begin{itemize}
+    \item Clustering finds structure by \textbf{similarity}
+    \item But similar features $\neq$ same outcome
+    \item We need methods that \textbf{use the labels}
+    \item This motivates \textbf{supervised learning}!
+\end{itemize}
+\end{columns}
+
+\vspace{0.5cm}
+\begin{center}
+\fbox{\parbox{0.7\textwidth}{
+\centering
+\textbf{Key Insight:} Unsupervised methods explore data structure.\\
+Supervised methods predict specific outcomes.\\
+They answer different questions.
+}}
+\end{center}
+\end{frame}
+
+%=============================================================================
+\section{Summary}
+%=============================================================================
+
+\begin{frame}{Key Takeaways}
+\begin{enumerate}
+    \item \textbf{Normalization} is essential before PCA and clustering -- prevents large-scale features from dominating
+    \item \textbf{PCA} reduces dimensions while preserving variance; cumulative variance plots help choose the number of components
+    \item \textbf{K-Means} partitions data into K clusters; use \textbf{elbow method} and \textbf{silhouette scores} to choose K
+    \item \textbf{Hierarchical clustering} provides a dendrogram -- no need to choose K upfront
+    \item \textbf{Confusion matrices} compare unsupervised clusters to known labels
+    \item Unsupervised methods \textbf{cannot} cleanly recover the survived/died groups in this dataset
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Next Week: Supervised Learning}
+\begin{itemize}
+    \item \textbf{Train/Test Split} -- evaluating models fairly
+    \item \textbf{Logistic Regression} -- the simplest classifier
+    \item \textbf{Random Forest} -- ensemble of decision trees
+    \item \textbf{ROC Curves \& AUC} -- measuring classification performance
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{center}
+\textbf{Key Difference:} Supervised methods \textit{use the labels} during training,\\
+which is why they can learn patterns that clustering cannot find.
+\end{center}
+\end{frame}
+
+\begin{frame}{Discussion}
+\begin{center}
+\Large\textbf{Does normalizing the data change the results of a t-test or Mann-Whitney U test?}
+
+\vspace{0.5cm}
+\Large\textit{Why or why not?}
+
+\vspace{1cm}
+\normalsize\textit{Hint: Think about what z-scoring does to the difference in means and the standard error.}
+\end{center}
+\end{frame}
+
+\begin{frame}{Exercises}
+\begin{enumerate}
+    \item Run PCA on \textbf{non-normalized} data. What happens and why?
+    \item Run PCA on normalized data \textbf{excluding the time column}. How do the loadings change?
+    \item Run K-Means with K=3 and plot the top 2 features colored by cluster
+    \item Compare K-Means clusters vs.\ true labels side-by-side on the top 2 features
+    \item Try different \textbf{linkage methods} for hierarchical clustering. How do the dendrograms change?
+    \item Re-run Week 2 statistical tests on normalized data. Are the p-values different?
+\end{enumerate}
+
+\vspace{0.3cm}
+\textbf{Resources:}
+\begin{itemize}
+    \item Scikit-learn PCA: \url{https://scikit-learn.org/stable/modules/decomposition.html}
+    \item Scikit-learn Clustering: \url{https://scikit-learn.org/stable/modules/clustering.html}
+    \item StatQuest PCA: \url{https://www.youtube.com/watch?v=FgakZw6K1QQ}
+\end{itemize}
+\end{frame}
+
+\end{document}
